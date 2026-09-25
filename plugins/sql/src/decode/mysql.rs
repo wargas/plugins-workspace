@@ -93,8 +93,15 @@ pub(crate) fn to_json(v: MySqlValueRef) -> Result<JsonValue, Error> {
                 JsonValue::Null
             }
         }
+        "DECIMAL" => {
+            if let Ok(v) = ValueRef::to_owned(&v).try_decode::<rust_decimal::Decimal>() {
+                JsonValue::String(v.to_string())
+            } else {
+                JsonValue::Null
+            }
+        }
         "NULL" => JsonValue::Null,
-        _ => return Err(Error::UnsupportedDatatype(v.type_info().name().to_string())),
+         _ => return Err(Error::UnsupportedDatatype(v.type_info().name().to_string())),
     };
 
     Ok(res)
